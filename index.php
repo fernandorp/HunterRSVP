@@ -7,7 +7,7 @@ $erros = [];
 $v = ['nome' => '', 'telefone' => '', 'vai' => 'sim', 'acompanhantes' => [], 'recado' => ''];
 $encerrado = time() > strtotime($config['prazo']);
 $whatsapp = 'https://wa.me/' . $config['whatsapp'] . '?text='
-    . rawurlencode("Oi Fernando! Sobre o {$ev['titulo']}: ");
+    . rawurlencode("Oi {$ev['anfitriao']}! Sobre o {$ev['titulo']}: ");
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && $encerrado) {
     header('Location: ./');
@@ -74,7 +74,7 @@ $primeiroNome = limpar($_GET['n'] ?? '', 40);
 <meta name="description" content="<?= h($ev['data'] . ' • ' . $ev['hora'] . ' • ' . $ev['local']) ?>">
 <meta property="og:title" content="<?= h($ev['titulo']) ?> — confirme sua presença">
 <meta property="og:description" content="<?= h($ev['data'] . ' • ' . $ev['hora'] . ' • ' . $ev['local']) ?>">
-<meta property="og:image" content="https://fernandocacador.com.br/40anos/convite.png?v=2">
+<meta property="og:image" content="<?= h(url_absoluta($ev['convite'])) ?>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Alfa+Slab+One&family=Kalam:wght@700&family=Roboto+Slab:wght@400;600;800&display=swap" rel="stylesheet">
@@ -83,7 +83,7 @@ $primeiroNome = limpar($_GET['n'] ?? '', 40);
 <body>
 <main class="pagina">
   <aside class="convite">
-    <img src="convite.png?v=2" alt="Convite: 40tão do Fernando — <?= h($ev['data'] . ', ' . $ev['hora'] . ', ' . $ev['local']) ?>">
+    <img src="<?= h($ev['convite']) ?>" alt="Convite: <?= h($ev['titulo'] . ' — ' . $ev['data'] . ', ' . $ev['hora'] . ', ' . $ev['local']) ?>">
   </aside>
 
   <section class="cartao">
@@ -108,12 +108,12 @@ $primeiroNome = limpar($_GET['n'] ?? '', 40);
         <p class="script">O prazo era até <?= h($config['prazo_texto']) ?>.</p>
         <p class="info"><strong><?= h($ev['data']) ?> • <?= h($ev['hora']) ?></strong><br><?= h($ev['local']) ?></p>
         <p>Precisa falar comigo sobre a festa?</p>
-        <a class="whatsapp" href="<?= h($whatsapp) ?>" target="_blank" rel="noopener">💬 Falar com o Fernando no WhatsApp</a>
+        <a class="whatsapp" href="<?= h($whatsapp) ?>" target="_blank" rel="noopener">💬 Falar com o <?= h($ev['anfitriao']) ?> no WhatsApp</a>
       </div>
     <?php else: ?>
       <header>
         <p class="sobre">Confirme sua presença no</p>
-        <h1><span>40tão</span> do Fernando</h1>
+        <h1><?= titulo_html($ev) ?></h1>
         <p class="quando">📅 <?= h($ev['data']) ?> • <?= h($ev['hora']) ?> &nbsp;·&nbsp; 📍 <?= h($ev['local']) ?></p>
         <p class="prazo">Confirme até <?= h($config['prazo_texto']) ?></p>
       </header>

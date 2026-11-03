@@ -1,6 +1,6 @@
 <?php
 // ============================================================
-//  Configuração do RSVP — 40tão do Fernando
+//  Configuração do RSVP — exemplo
 //  Copie para config.php e edite os valores antes de subir para a hospedagem.
 // ============================================================
 
@@ -34,17 +34,20 @@ return [
     'fuso'            => 'America/Sao_Paulo',
 
     // Depois deste momento o formulário fecha (horário do fuso acima)
-    'prazo'           => '2026-11-12 23:59:59',
-    'prazo_texto'     => '12 de novembro',
+    'prazo'           => '2026-11-15 23:59:59',
+    'prazo_texto'     => '15 de novembro',
 
     // WhatsApp do aniversariante (com DDI+DDD, só números) para o botão de contato
     'whatsapp'        => '5511999999999',
 
     // Dados do evento (aparecem no formulário e no e-mail)
     'evento' => [
-        'titulo' => '40tão do Fernando',
-        'data'   => '20 de novembro',
-        'hora'   => '13h',
-        'local'  => 'Quinta dos Ventos — Churrasqueira',
+        'titulo'    => '40 anos do Rafael',
+        'destaque'  => '40 anos',               // início do título pintado de laranja
+        'anfitriao' => 'Rafael',                // usado no botão/mensagem do WhatsApp
+        'convite'   => 'convite-exemplo.png',   // imagem do convite (mude o ?v= ao trocar a arte)
+        'data'      => '23 de novembro',
+        'hora'      => '13h',
+        'local'     => 'Espaço Jardim Imperial — Ribeirão Preto',
     ],
 ];

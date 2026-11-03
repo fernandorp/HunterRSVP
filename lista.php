@@ -92,7 +92,7 @@ function botao_remover(string $nome, string $qs): string
 </head>
 <body>
 <main class="lista">
-  <h1><span style="color:var(--laranja)">40tão</span> do Fernando</h1>
+  <h1><?= titulo_html($ev, 'color:var(--laranja)') ?></h1>
   <p class="quando" style="text-align:center"><?= h($ev['data']) ?> • <?= h($ev['hora']) ?> · <?= h($ev['local']) ?></p>
 
   <section class="numeros">

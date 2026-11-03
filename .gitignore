@@ -7,3 +7,6 @@ dados/*.bak
 dados/email.log
 
 .DS_Store
+
+# Arte real do evento (o repositório usa convite-exemplo.png)
+convite.png

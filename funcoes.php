@@ -17,6 +17,25 @@ function h(?string $texto): string
     return htmlspecialchars((string) $texto, ENT_QUOTES, 'UTF-8');
 }
 
+/** Título do evento com o trecho "destaque" (ex.: "40tão") pintado de laranja. */
+function titulo_html(array $ev, string $estilo = ''): string
+{
+    $d = $ev['destaque'] ?? '';
+    if ($d === '' || !str_starts_with($ev['titulo'], $d)) {
+        return h($ev['titulo']);
+    }
+    $attr = $estilo !== '' ? ' style="' . h($estilo) . '"' : '';
+    return "<span{$attr}>" . h($d) . '</span>' . h(substr($ev['titulo'], strlen($d)));
+}
+
+/** URL absoluta de um arquivo desta pasta (para og:image). */
+function url_absoluta(string $arquivo): string
+{
+    $https = ($_SERVER['HTTPS'] ?? '') === 'on' || ($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '') === 'https';
+    $dir = rtrim(dirname($_SERVER['SCRIPT_NAME'] ?? '/'), '/');
+    return ($https ? 'https' : 'http') . '://' . ($_SERVER['HTTP_HOST'] ?? 'localhost') . $dir . '/' . $arquivo;
+}
+
 /** Grava uma confirmação como uma linha legível no .txt. */
 function gravar_confirmacao(string $arquivo, array $r): bool
 {
@@ -121,7 +140,7 @@ function enviar_email(array $config, array $r): bool
     $corpo .= "{$ev['data']} • {$ev['hora']} • {$ev['local']}\n";
 
     $headers = implode("\r\n", [
-        'From: =?UTF-8?B?' . base64_encode('RSVP 40tão') . "?= <{$config['email_remetente']}>",
+        'From: =?UTF-8?B?' . base64_encode('RSVP ' . (($ev['destaque'] ?? '') ?: $ev['titulo'])) . "?= <{$config['email_remetente']}>",
         'MIME-Version: 1.0',
         'Content-Type: text/plain; charset=UTF-8',
         'Content-Transfer-Encoding: 8bit',
