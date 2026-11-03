@@ -1,0 +1,9 @@
+# Configuração real (senha SMTP, chave da lista, contatos) — use config.exemplo.php
+config.php
+
+# Dados dos convidados e logs gerados no servidor
+dados/confirmacoes.txt
+dados/*.bak
+dados/email.log
+
+.DS_Store
