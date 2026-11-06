@@ -111,6 +111,37 @@ function remover_confirmacao(string $arquivo, string $chave): int
     return $removidas;
 }
 
+/** Troca os acompanhantes da resposta mais recente de uma pessoa. Retorna true se achou. */
+function editar_acompanhantes(string $arquivo, string $chave, array $acompanhantes): bool
+{
+    $fp = @fopen($arquivo, 'c+');
+    if (!$fp || !flock($fp, LOCK_EX)) {
+        return false;
+    }
+    $linhas = [];
+    $ultima = null;
+    while (($linha = fgets($fp)) !== false) {
+        $p = explode(' | ', rtrim($linha, "\r\n"));
+        if (!str_starts_with($linha, '#') && count($p) >= 7 && chave_nome($p[2]) === $chave) {
+            $ultima = count($linhas);
+        }
+        $linhas[] = $linha;
+    }
+    if ($ultima !== null) {
+        $p = explode(' | ', rtrim($linhas[$ultima], "\r\n"));
+        $p[4] = count($acompanhantes);
+        $p[5] = $acompanhantes ? implode('; ', $acompanhantes) : '-';
+        $linhas[$ultima] = implode(' | ', $p) . PHP_EOL;
+        ftruncate($fp, 0);
+        rewind($fp);
+        fwrite($fp, implode('', $linhas));
+        fflush($fp);
+    }
+    flock($fp, LOCK_UN);
+    fclose($fp);
+    return $ultima !== null;
+}
+
 /** Chave para identificar a mesma pessoa (ignora acentos, maiúsculas e espaços). */
 function chave_nome(string $nome): string
 {

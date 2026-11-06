@@ -33,6 +33,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['remover'])) {
     exit;
 }
 
+// Editar acompanhantes (um nome por linha)
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['editar'])) {
+    $acomp = [];
+    foreach (preg_split('/\R/', (string) ($_POST['acompanhantes'] ?? '')) as $a) {
+        $a = str_replace(';', ',', limpar($a, 80));
+        if ($a !== '') {
+            $acomp[] = $a;
+        }
+    }
+    editar_acompanhantes($config['arquivo'], (string) $_POST['editar'], array_slice($acomp, 0, (int) $config['max_acompanhantes']));
+    header('Location: ?chave=' . rawurlencode($chave), true, 303);
+    exit;
+}
+
 $todos = ler_confirmacoes($config['arquivo']);
 
 // Se a mesma pessoa respondeu mais de uma vez, vale a resposta mais recente.
@@ -55,6 +69,7 @@ function botao_remover(string $nome, string $qs): string
         . '<input type="hidden" name="remover" value="' . h(chave_nome($nome)) . '">'
         . '<button type="submit" class="remover" title="Remover da lista">Remover</button></form>';
 }
+$linhaEdicao = 0;
 ?>
 <!doctype html>
 <html lang="pt-BR">
@@ -88,6 +103,16 @@ function botao_remover(string $nome, string $qs): string
   .nome form { margin: 0; flex-shrink: 0; }
   .remover { font: 600 12px "Roboto Slab", serif; color: #b3261e; background: none; border: 1px solid currentColor; border-radius: 6px; padding: 3px 8px; cursor: pointer; }
   .remover:hover { background: #b3261e; color: #fff; }
+  .botoes { display: flex; gap: 6px; flex-shrink: 0; }
+  .editar, .salvar, .cancelar { font: 600 12px "Roboto Slab", serif; border-radius: 6px; padding: 3px 8px; cursor: pointer; border: 1px solid var(--laranja); }
+  .editar, .cancelar { color: var(--laranja); background: none; }
+  .editar:hover { background: var(--laranja); color: #fff; }
+  .salvar { color: #fff; background: var(--laranja); }
+  .edicao td { background: #fff6ea; }
+  .edicao form { display: grid; gap: 8px; max-width: 420px; }
+  .edicao label { display: grid; gap: 6px; font-size: 14px; }
+  .edicao textarea { font: inherit; padding: 8px 10px; border: 1.5px solid var(--borda); border-radius: 8px; resize: vertical; }
+  .edicao .salvar, .edicao .cancelar { font-size: 14px; padding: 6px 14px; }
 </style>
 </head>
 <body>
@@ -112,11 +137,26 @@ function botao_remover(string $nome, string $qs): string
       <tbody>
       <?php foreach ($sim as $r): ?>
         <tr>
-          <td><div class="nome"><div><strong><?= h($r['nome']) ?></strong><?php if ($r['recado']): ?><div class="recado">“<?= h($r['recado']) ?>”</div><?php endif; ?></div><?= botao_remover($r['nome'], $qs) ?></div></td>
+          <?php $idEd = 'ed' . ++$linhaEdicao; ?>
+          <td><div class="nome"><div><strong><?= h($r['nome']) ?></strong><?php if ($r['recado']): ?><div class="recado">“<?= h($r['recado']) ?>”</div><?php endif; ?></div><div class="botoes"><button type="button" class="editar" data-alvo="<?= $idEd ?>">Editar</button><?= botao_remover($r['nome'], $qs) ?></div></div></td>
           <td><?= $r['acompanhantes'] ? h(implode(', ', $r['acompanhantes'])) : '—' ?></td>
           <td class="n"><?= 1 + count($r['acompanhantes']) ?></td>
           <td><?= $r['telefone'] ? h($r['telefone']) : '—' ?></td>
           <td><?= h($r['data']) ?></td>
+        </tr>
+        <tr class="edicao" id="<?= $idEd ?>" hidden>
+          <td colspan="5">
+            <form method="post" action="?<?= h($qs) ?>">
+              <input type="hidden" name="editar" value="<?= h(chave_nome($r['nome'])) ?>">
+              <label>Acompanhantes de <strong><?= h($r['nome']) ?></strong> <small>(um nome por linha, até <?= (int) $config['max_acompanhantes'] ?>)</small>
+                <textarea name="acompanhantes" rows="<?= max(3, count($r['acompanhantes']) + 2) ?>"><?= h(implode("\n", $r['acompanhantes'])) ?></textarea>
+              </label>
+              <div class="botoes">
+                <button type="submit" class="salvar">Salvar</button>
+                <button type="button" class="cancelar" data-alvo="<?= $idEd ?>">Cancelar</button>
+              </div>
+            </form>
+          </td>
         </tr>
       <?php endforeach; ?>
       </tbody>
@@ -147,5 +187,14 @@ function botao_remover(string $nome, string $qs): string
     <a href="?<?= $qs ?>">Atualizar</a>
   </div>
 </main>
+<script>
+document.addEventListener('click', function (e) {
+  var b = e.target.closest('.editar, .cancelar');
+  if (!b) return;
+  var linha = document.getElementById(b.dataset.alvo);
+  linha.hidden = !linha.hidden;
+  if (!linha.hidden) linha.querySelector('textarea').focus();
+});
+</script>
 </body>
 </html>
